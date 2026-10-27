@@ -74,19 +74,17 @@ public class TransformerRunner {
         String finalCode = originalCode;
         List<String> appliedRulesTotal = new ArrayList<>();
 
-        for (BaseTransformer transformer : transformers) {
-            CompilationUnit cu;
-            try {
-                cu = StaticJavaParser.parse(originalCode);
-            } catch (Exception e) {
-                logger.warning("Syntax error parsing " + filePath + " before applying " +
-                        transformer.getClass().getSimpleName() + ": " + e.getMessage());
-                continue;
-            }
+        CompilationUnit cu;
+        try {
+            cu = StaticJavaParser.parse(originalCode);
+        } catch (Exception e) {
+            logger.warning("Syntax error parsing " + filePath + ": " + e.getMessage());
+            return Map.of("file", filePath.toString(), "changed", false, "rules", Collections.emptyList());
+        }
 
-            CompilationUnit transformed;
+        for (BaseTransformer transformer : transformers) {
             try {
-                transformed = transformer.transform(cu);
+                cu = transformer.transform(cu);
             } catch (Exception e) {
                 logger.warning("Error applying " + transformer.getClass().getSimpleName() +
                         " to " + filePath + ": " + e.getMessage());
@@ -98,8 +96,11 @@ public class TransformerRunner {
             if (!appliedRules.isEmpty()) {
                 changedAny = true;
                 appliedRulesTotal.addAll(appliedRules);
-                finalCode = transformed.toString();
             }
+        }
+
+        if (changedAny) {
+            finalCode = cu.toString();
         }
 
         if (changedAny) {

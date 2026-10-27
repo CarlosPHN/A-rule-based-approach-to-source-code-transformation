@@ -46,34 +46,35 @@ def transform_code(file_path, output_path, rules):
         original_code = f.read()
 
     applied_rules_total = []
-    final_code = original_code
     changed_any = False
 
-    # Cada transformador se aplica de forma independiente al código original
-    for transformer in transformers:
-        try:
-            tree = ast.parse(original_code)  # Siempre desde el original
-        except SyntaxError as e:
-            logger.error(f"Syntax error in {file_path} before applying {transformer.__class__.__name__}: {e}")
-            continue
-        except Exception as e:
-            logger.error(f"Error parsing {file_path} before applying {transformer.__class__.__name__}: {e}")
-            continue
+    # Parse once; transformers are applied cumulatively on the same AST
+    try:
+        tree = ast.parse(original_code)
+    except SyntaxError as e:
+        logger.error(f"Syntax error in {file_path}: {e}")
+        return {"file": file_path, "changed": False, "rules": []}
+    except Exception as e:
+        logger.error(f"Error parsing {file_path}: {e}")
+        return {"file": file_path, "changed": False, "rules": []}
 
+    for transformer in transformers:
         try:
             tree = transformer.visit(tree)
             ast.fix_missing_locations(tree)
-            transformed_code = ast.unparse(tree)
 
             applied_rules = getattr(transformer, "applied_rules", [])
             if applied_rules:
                 applied_rules_total.extend(applied_rules)
                 changed_any = True
-                # Actualizamos final_code solo si hubo cambios
-                final_code = transformed_code
         except Exception as e:
             logger.error(f"Error applying {transformer.__class__.__name__} to {file_path}: {e}")
             continue
+
+    if changed_any:
+        final_code = ast.unparse(tree)
+    else:
+        final_code = original_code
 
     if changed_any:
         logger.info(f"Changes detected in {file_path}, writing transformed code to {output_path}.")

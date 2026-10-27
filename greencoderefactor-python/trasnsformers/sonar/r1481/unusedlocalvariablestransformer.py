@@ -21,16 +21,18 @@ class UnusedLocalVariablesTransformer(BaseTransformer):
             node.body = [ast.Pass()]
         return node
 
-    def _remove_unused_all(self, stmts, used_vars, global_vars=None):
+    def _remove_unused_all(self, stmts, used_vars, global_vars=None, allow_empty=False):
         if global_vars is None:
             global_vars = set()
 
         new_body = []
         for stmt in stmts:
             if hasattr(stmt, "body") and isinstance(stmt.body, list):
-                stmt.body = self._remove_unused_all(stmt.body, used_vars, global_vars)
+                stmt.body = self._remove_unused_all(stmt.body, used_vars, global_vars, allow_empty=False)
                 if hasattr(stmt, "orelse") and isinstance(stmt.orelse, list):
-                    stmt.orelse = self._remove_unused_all(stmt.orelse, used_vars, global_vars)
+                    stmt.orelse = self._remove_unused_all(stmt.orelse, used_vars, global_vars, allow_empty=True)
+                if hasattr(stmt, "finalbody") and isinstance(stmt.finalbody, list):
+                    stmt.finalbody = self._remove_unused_all(stmt.finalbody, used_vars, global_vars, allow_empty=True)
 
             if isinstance(stmt, (ast.Global, ast.Nonlocal)):
                 global_vars.update(stmt.names)
@@ -77,7 +79,7 @@ class UnusedLocalVariablesTransformer(BaseTransformer):
 
             new_body.append(stmt)
 
-        if not new_body:
+        if not new_body and not allow_empty:
             new_body = [ast.Pass()]
 
         return new_body

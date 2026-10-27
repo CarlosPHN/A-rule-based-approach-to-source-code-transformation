@@ -1,6 +1,6 @@
 # GreenCodeRefactor
 
-**Rule-based, AST-driven automatic code refactoring for energy-efficient software.**
+**Rule-based automatic code refactoring for energy-efficient software.**
 
 GreenCodeRefactor applies behavior-preserving source-code transformations aimed at reducing energy consumption. It includes implementations in Java (using JavaParser) and Python (using the standard-library ast module).
 
@@ -17,7 +17,7 @@ The transformations are based on [*Evaluating the Energy Efficiency of Optimizat
 | `UnusedAssignmentTransformer` | Technique T9 — Dead Code Elimination; Sonar RSPEC-1854 | Removes dead stores: assignments whose values are overwritten before being read. |
 | `ExplicitRaiseToExceptBodyTransformer` | Technique T10 — Explicit raise to except body | Replaces an explicit `raise SomeException(...)` inside a `try` block, caught by a matching `except` without an alias, with the body of the `except` handler. |
 
-### 3.1 `UnusedLocalVariablesTransformer` (RSPEC-1481)
+### 2.1 `UnusedLocalVariablesTransformer` (RSPEC-1481)
 
 ```python
 # Before
@@ -33,7 +33,7 @@ def operate():
     return a
 ```
 
-### 3.2 `UnusedAssignmentTransformer` (RSPEC-1854)
+### 2.2 `UnusedAssignmentTransformer` (RSPEC-1854)
 
 ```python
 # Before                          # After
@@ -44,7 +44,7 @@ def f():
     return b                      #     return b
 ```
 
-### 3.3 `ExplicitRaiseToExceptBodyTransformer` (T10)
+### 2.3 `ExplicitRaiseToExceptBodyTransformer` (T10)
 
 ```python
 # Before                                                  # After
@@ -67,7 +67,7 @@ the transformation.
 
 ---
 
-## 4. Repository layout
+## 3. Repository layout
 
 ```
 greencoderefactor/
@@ -79,9 +79,9 @@ greencoderefactor/
 
 ---
 
-## 5. Evaluation
+## 4. Evaluation
 
-### 5.1 Benchmark setup
+### 4.1 Benchmark setup
 
 The benchmark is located in `greencoderefactor-python/repo/` and contains:
 
@@ -89,11 +89,11 @@ The benchmark is located in `greencoderefactor-python/repo/` and contains:
 - `process_data.py` — exception handling inside a loop.
 - `test_data.py` — benchmark suite used to measure execution time and energy consumption.
 
-### 6.2 Energy measurement methodology
+### 4.2 Energy measurement methodology
 
 Energy consumption was measured using `perf stat` with RAPL counters. The original and transformed benchmarks were each executed 30 times. Results are stored in `energy-results/`, with aggregated statistics in `energy-results/plots/energy_summary.csv`.
 
-### 6.3 Results
+### 4.3 Results
 
 | Metric | Original | Transformed | Reduction |
 |---|---:|---:|---:|
@@ -106,7 +106,7 @@ The results suggest that removing exception handling from the inner loop (T10) a
 
 Figures are available in `energy-results/plots/`.
 
-### 6.4 LLM-based validation
+### 4.4 LLM-based validation
 
 The `llm-based/` folder contains 30 independent iterations in which an LLM applied refactoring transformations to the source code. Each iteration stores the agent's output, execution statistics and transformed code.
 

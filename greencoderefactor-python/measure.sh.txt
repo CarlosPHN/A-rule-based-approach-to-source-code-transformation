@@ -1,0 +1,24 @@
+#!/bin/bash
+
+INPUT="repo" OUTPUT="output" RULES="ExplicitRaiseToExceptBodyTransformer,UnusedLocalVariablesTransformer,UnusedAssignmentTransformer"
+
+REPETITIONS=30
+
+mkdir -p results
+
+for i in $(seq 1 $REPETITIONS) do echo "======================================" echo "Execution 
+𝑖
+/
+REPETITIONS" echo "======================================"
+
+perf stat -o "results/perf_${i}.txt" \
+    -e cycles,instructions,cache-references,cache-misses,task-clock \
+    python main.py \
+    --input "$INPUT" \
+    --output "$OUTPUT" \
+    --rules "$RULES"
+
+
+done
+
+echo "======================================" echo "Experiment completed: $REPETITIONS repetitions" echo "Results saved in results/" echo "======================================"

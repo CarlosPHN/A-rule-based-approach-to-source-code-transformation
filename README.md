@@ -111,3 +111,7 @@ Figures are available in `energy-results/plots/`.
 The `llm-based/` folder contains 30 independent iterations in which an LLM applied refactoring transformations to the source code. Each iteration stores the agent's output, execution statistics and transformed code.
 
 All 30 iterations passed functional validation, although two contained an incomplete Dead Code Elimination transformation.
+
+### 4.5 Rule-based validation
+
+The `rule-based/` folder contains 30 independent iterations in which te rule-based approach applied refactoring transformations to the source code.
